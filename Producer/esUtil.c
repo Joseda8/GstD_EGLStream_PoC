@@ -116,7 +116,7 @@ EGLBoolean CreateEGLContext ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
    // Make the context current
    if ( !eglMakeCurrent(display, surface, surface, context) )
    {
-      printf ("Bad make current \n");
+      printf ("Bag make current \n");
       return EGL_FALSE;
    }
    
@@ -171,7 +171,7 @@ EGLBoolean WinCreate(ESContext *esContext, const char *title)
     XSetWMHints(x_display, win, &hints);
 
     // make the window visible on the screen
-    XMapWindow (x_display, win);
+    // XMapWindow (x_display, win);
     XStoreName (x_display, win, title);
 
     // get identifiers for the provided atom name strings
@@ -261,7 +261,7 @@ void ESUTIL_API esInitContext ( ESContext *esContext )
 //          ES_WINDOW_STENCIL     - specifies that a stencil buffer should be created
 //          ES_WINDOW_MULTISAMPLE - specifies that a multi-sample buffer should be created
 //
-GLboolean ESUTIL_API esCreateWindow ( ESContext *esContext, const char* title, GLint width, GLint height, GLuint flags, EGLStreamKHR *stream, int evfd )
+GLboolean ESUTIL_API esCreateWindow( ESContext *esContext, const char* title, GLint width, GLint height, GLuint flags, EGLStreamKHR *stream, int evfd )
 {
    EGLint attribList[] =
    {
@@ -289,7 +289,7 @@ GLboolean ESUTIL_API esCreateWindow ( ESContext *esContext, const char* title, G
    }
 
   
-   if ( !CreateEGLContext ( esContext->hWnd,
+   if ( !CreateEGLContext( esContext->hWnd,
                             &esContext->eglDisplay,
                             &esContext->eglContext,
                             &esContext->eglSurface,
@@ -330,7 +330,7 @@ void ESUTIL_API esMainLoop ( ESContext *esContext )
         if (esContext->drawFunc != NULL)
             esContext->drawFunc(esContext);
 
-        // eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
+        eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
 
         totaltime += deltatime;
         frames++;

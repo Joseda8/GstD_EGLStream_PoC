@@ -1,49 +1,39 @@
-/*
- * Author: José Daniel Montoya Salazar <jose.montoya@ridgerun.com>
- * Using: libancillary - black magic on Unix domain sockets by Nicolas George
- *
- * About libancillary
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *  3. The name of the author may not be used to endorse or promote products
- *     derived from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+//
+// Book:      OpenGL(R) ES 2.0 Programming Guide
+// Authors:   Aaftab Munshi, Dan Ginsburg, Dave Shreiner
+// ISBN-10:   0321502795
+// ISBN-13:   9780321502797
+// Publisher: Addison-Wesley Professional
+// URLs:      http://safari.informit.com/9780321563835
+//            http://www.opengles-book.com
+//
 
+// Simple_Texture2D.c
+//
+//    This is a simple example that draws a quad with a 2D
+//    texture image. The purpose of this example is to demonstrate 
+//    the basics of 2D texturing
+//
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <gstd.h>
 
 #include "esUtil.h"
 
-PFNEGLGETSTREAMFILEDESCRIPTORKHRPROC            eglGetStreamFileDescriptorKHR;
-PFNEGLSTREAMCONSUMERACQUIREKHRPROC              eglStreamConsumerAcquireKHR;
-PFNEGLSTREAMCONSUMERRELEASEKHRPROC              eglStreamConsumerReleaseKHR;
-PFNEGLSTREAMCONSUMERGLTEXTUREEXTERNALKHRPROC    eglStreamConsumerGLTextureExternalKHR;
-PFNEGLCREATESTREAMKHRPROC                       eglCreateStreamKHR;
-PFNEGLQUERYSTREAMKHRPROC                        eglQueryStreamKHR;
-PFNEGLSTREAMATTRIBKHRPROC                       eglStreamAttribKHR;
-PFNEGLCREATESTREAMFROMFILEDESCRIPTORKHRPROC     eglCreateStreamFromFileDescriptorKHR;
-PFNEGLDESTROYSTREAMKHRPROC                      eglDestroyStreamKHR;
+PFNEGLGETSTREAMFILEDESCRIPTORKHRPROC eglGetStreamFileDescriptorKHR;
+PFNEGLSTREAMCONSUMERACQUIREKHRPROC eglStreamConsumerAcquireKHR;
+PFNEGLSTREAMCONSUMERRELEASEKHRPROC eglStreamConsumerReleaseKHR;
+PFNEGLSTREAMCONSUMERGLTEXTUREEXTERNALKHRPROC eglStreamConsumerGLTextureExternalKHR;
+PFNEGLCREATESTREAMKHRPROC eglCreateStreamKHR;
+PFNEGLQUERYSTREAMKHRPROC eglQueryStreamKHR;
+PFNEGLSTREAMATTRIBKHRPROC eglStreamAttribKHR;
+
 
 EGLStreamKHR stream;
 EGLBoolean eglStatus = EGL_TRUE;
+
+GstD *manager = NULL;
 
 
 void initEGLStreamUtil () {
@@ -54,7 +44,6 @@ void initEGLStreamUtil () {
    eglCreateStreamKHR = (PFNEGLCREATESTREAMKHRPROC)eglGetProcAddress("eglCreateStreamKHR");
    eglQueryStreamKHR = (PFNEGLQUERYSTREAMKHRPROC)eglGetProcAddress("eglQueryStreamKHR");
    eglStreamAttribKHR = (PFNEGLSTREAMATTRIBKHRPROC)eglGetProcAddress("eglStreamAttribKHR");
-   eglDestroyStreamKHR = (PFNEGLDESTROYSTREAMKHRPROC)eglGetProcAddress("eglDestroyStreamKHR");
 }
 
 typedef struct
@@ -81,6 +70,18 @@ GLuint CreateSimpleTexture2D( int red, int green, int blue )
 {
    // Texture object handle
    GLuint textureId;
+   
+   // 2x2 Image, 3 bytes per pixel (R, G, B)
+   GLubyte pixels[4 * 3] =
+   {  
+      255,   0,   0, // Red
+        0, 255,   0, // Green
+        0,   0, 255, // Blue
+      red, green, blue  // Yellow
+   };
+
+   // Use tightly packed data
+   glPixelStorei ( GL_UNPACK_ALIGNMENT, 1 );
 
    // Generate a texture object
    glGenTextures ( 1, &textureId );
@@ -90,11 +91,19 @@ GLuint CreateSimpleTexture2D( int red, int green, int blue )
 
    // Bind the texture object
    glBindTexture ( GL_TEXTURE_EXTERNAL_OES, textureId );
+   // glBindTexture ( GL_TEXTURE_2D, textureId );
 
    glTexParameterf (GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
    glTexParameterf (GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
    glTexParameterf (GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
    glTexParameterf (GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+   // Load the texture
+   glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels );
+
+   // Set the filtering mode
+   glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+   glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 
    return textureId;
 
@@ -105,7 +114,7 @@ GLuint CreateSimpleTexture2D( int red, int green, int blue )
 //
 int Init ( ESContext *esContext )
 {
-   esContext->userData = malloc(sizeof(UserData)); 
+   esContext->userData = malloc(sizeof(UserData));	
    UserData *userData = esContext->userData;
    GLbyte vShaderStr[] =  
       "attribute vec4 a_position;   \n"
@@ -122,6 +131,7 @@ int Init ( ESContext *esContext )
       "precision mediump float;                            \n"
       "uniform samplerExternalOES texunit;                 \n"
       "varying vec2 v_texCoord;                            \n"
+      "uniform sampler2D s_texture;                        \n"
       "void main()                                         \n"
       "{                                                   \n"
       "  gl_FragColor = texture2D( texunit, v_texCoord );  \n"
@@ -136,7 +146,7 @@ int Init ( ESContext *esContext )
    userData->texCoordLoc = glGetAttribLocation ( userData->programObject, "a_texCoord" );
    
    // Get the sampler location
-   userData->samplerLoc = glGetUniformLocation ( userData->programObject, "texunit" );
+   userData->samplerLoc = glGetUniformLocation ( userData->programObject, "s_texture" );
    if (userData->samplerLoc == -1) {
       printf ("%s\n", "No active uniform.");
    }
@@ -184,7 +194,6 @@ void Draw ( ESContext *esContext )
       {
       case EGL_STREAM_STATE_DISCONNECTED_KHR:
          printf("Lost connection.\n");
-         exit (0);
          break;
       case EGL_BAD_STATE_KHR:
          printf("Bad state.\n");
@@ -292,22 +301,8 @@ void ShutDown ( ESContext *esContext )
 
    // Delete program object
    glDeleteProgram ( userData->programObject );
-   
+	
    free(esContext->userData);
-}
-
-int connection_handler(int connection_fd, EGLNativeFileDescriptorKHR fd)
-{
-    int i;
-
-    if (ancil_send_fd(connection_fd, fd)) {
-        perror("ancil_send_fd");
-        exit(1);
-    } else {
-       printf("Sent evfd %d\n", fd);
-    }
-    
-    return 0;
 }
 
 
@@ -318,42 +313,16 @@ int main ( int argc, char *argv[] )
 
    static const EGLint streamAttrFIFOMode[] = { EGL_STREAM_FIFO_LENGTH_KHR, 5, EGL_SUPPORT_RESET_NV, EGL_TRUE, EGL_NONE };
 
+
+   int ret = GSTD_EOK;
    int time_sleep = 1;
    
    int fifoLength = 0;
    int latency = 0;
 
-   EGLNativeFileDescriptorKHR fd;
-   char *socket_name = "gstd_eglstream_test";
+   GstdObject *resource = NULL;
+   GstElement *element = NULL;
 
-   struct sockaddr_un address;
-   int socket_fd, connection_fd;
-   socklen_t address_length  = sizeof(address);
-   int enable = 1;
-
-   socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
-   if(socket_fd < 0) {
-      printf("socket() failed\n");
-      return 1;
-   }
-
-   setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
-
-   memset(&address, 0, sizeof(struct sockaddr_un));
-   address.sun_family = AF_UNIX;
-
-   snprintf(address.sun_path,sizeof(address.sun_path), "%s", socket_name);
-   address.sun_path[0] = '\0';
-
-   if (bind(socket_fd, (struct sockaddr *) &address, sizeof(struct sockaddr_un)) != 0) {
-      fprintf(stderr,"bind() failed: %s\n", strerror(errno));
-      return 1;
-   }
-
-   if (listen(socket_fd, 5) != 0) {
-      fprintf(stderr,"listen() failed: %s\n", strerror(errno));
-      return 1;
-   }
 
    esInitContext ( &esContext );
    esContext.userData = &userData;
@@ -370,14 +339,6 @@ int main ( int argc, char *argv[] )
      printf("Could not create EGL stream.\n");
      eglStatus = EGL_FALSE;
    }
-
-   fd = eglGetStreamFileDescriptorKHR(esContext.eglDisplay, stream);
-   if (fd == EGL_NO_FILE_DESCRIPTOR_KHR) {
-     printf("Could not get file descriptor.\n");
-     eglStatus = EGL_FALSE;
-   }
-   printf("File descriptor: %d\n.", fd);
-
 
    if (!eglStreamConsumerGLTextureExternalKHR(esContext.eglDisplay, stream)) {
      printf("Could not bind texture.\n");
@@ -401,26 +362,58 @@ int main ( int argc, char *argv[] )
 
    printf("EGL Stream consumer - Mode: FIFO, Length: %d, latency %d.\n", fifoLength, latency);
 
-   printf ("Waiting for client...\n");
-   if ((connection_fd = accept(socket_fd, (struct sockaddr *) &address, &address_length)) > -1) {
-      connection_handler(connection_fd, fd);
-      close(connection_fd);
-   } else {
-      fprintf(stderr,"accept() failed: %s\n", strerror(errno));
-      close(socket_fd);
-   }
+
 
    esRegisterDrawFunc ( &esContext, Draw );
 
 
-   esMainLoop ( &esContext );
 
-   ShutDown ( &esContext );
+   gstd_new (&manager, 0, NULL);
 
-   if ( eglDestroyStreamKHR (esContext.eglDisplay, stream) ) {
-      printf ("%s\n", "Could not destroy the stream");
-   } else {
-      stream = EGL_NO_STREAM_KHR;
+   g_print ("Starting...\n");
+   if (!gstd_start (manager)) {
+     return FALSE;
    }
 
+   // ret = gstd_create (manager, "/pipelines", "p", "videotestsrc name=vts ! autovideosink");
+   ret = gstd_create (manager, 
+      "/pipelines", 
+      "p", 
+      "filesrc location=/home/joseda8/Desktop/test2.mp4 ! qtdemux name=demux ! h264parse ! omxh264dec ! nvvidconv ! nvvideosink name=nv_sink");
+   if (GSTD_EOK != ret) {
+   g_print ("Failed \n");
+   return 0;
+   }
+
+   gstd_read (manager, "pipelines/p/elements/nv_sink", &resource);
+
+   /* Get the gstreamer element from the resource */
+   g_object_get (resource, "gstelement", &element, NULL);
+   if (element == NULL) {
+      printf ("%s\n", "No element");
+      return FALSE;
+   }
+
+   g_object_set (element, "display", esContext.eglDisplay, NULL);
+   g_object_set (element, "stream", stream, NULL);
+   g_object_set (element, "fifo", TRUE, NULL);
+   g_object_set (element, "fifo-size", fifoLength, NULL);
+
+   gstd_update (manager, "/pipelines/p/state", "playing");
+
+   /* Change the property from the gstreamer element */
+   // g_object_set (element, "pattern", 1, NULL);
+
+   esMainLoop ( &esContext );
+
+   /* Stop any GstD array */
+
+   gstd_update (manager, "/pipelines/p/state", "paused");
+   gstd_delete (manager, "/pipelines", "p");
+
+   gstd_stop (manager);
+   gst_deinit ();
+   gstd_free(manager);
+
+   ShutDown ( &esContext );
 }

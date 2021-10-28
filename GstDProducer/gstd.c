@@ -185,7 +185,7 @@ int main ( int argc, char *argv[] )
    ret = gstd_create (manager, 
       "/pipelines", 
       "p",
-      "videotestsrc pattern=18 ! nvvidconv ! nvvideosink name=nv_sink"); 
+      "videotestsrc pattern=0 ! nvvidconv ! nvvideosink name=nv_sink"); 
       // "filesrc location=/home/joseda8/Desktop/test3.mp4 ! qtdemux name=demux ! h264parse ! omxh264dec ! nvvidconv ! nvvideosink name=nv_sink");
    if (GSTD_EOK != ret) {
    g_print ("Failed \n");

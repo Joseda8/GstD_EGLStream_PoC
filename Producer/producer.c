@@ -77,7 +77,7 @@ GLuint CreateSimpleTexture2D( int red, int green, int blue )
 //
 int Init ( ESContext *esContext )
 {
-   esContext->userData = malloc(sizeof(UserData)); 
+   esContext->userData = malloc(sizeof(UserData));	
    UserData *userData = esContext->userData;
    GLbyte vShaderStr[] =  
       "attribute vec4 a_position;   \n"
@@ -118,7 +118,6 @@ int Init ( ESContext *esContext )
 ///
 // Draw a triangle using the shader pair created in Init()
 //
-int control = 0;
 void Draw ( ESContext *esContext )
 {
    UserData *userData = esContext->userData;
@@ -152,17 +151,9 @@ void Draw ( ESContext *esContext )
    glEnableVertexAttribArray ( userData->positionLoc );
    glEnableVertexAttribArray ( userData->texCoordLoc );
 
-   control++;
-   if (control == 250){
-      control = 0;
-   }
-
    // Bind the texture
    glActiveTexture ( GL_TEXTURE0 );
    glBindTexture ( GL_TEXTURE_2D, userData->textureId );
-
-   userData->textureId = CreateSimpleTexture2D (200, control, 255);
-   eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
 
    // Set the sampler texture unit to 0
    glUniform1i ( userData->samplerLoc, 0 );
@@ -183,7 +174,7 @@ void ShutDown ( ESContext *esContext )
 
    // Delete program object
    glDeleteProgram ( userData->programObject );
-   
+	
    free(esContext->userData);
 }
 
@@ -195,10 +186,8 @@ int main ( int argc, char *argv[] )
    EGLBoolean eglStatus = EGL_TRUE;
    EGLStreamKHR stream;
 
-   static const EGLint streamAttrFIFOMode[] = { EGL_STREAM_FIFO_LENGTH_KHR, 5, EGL_SUPPORT_REUSE_NV, EGL_FALSE, EGL_NONE };
-
    EGLNativeFileDescriptorKHR fd;
-   char *socket_name = "Xeventfd_socket";
+   char *socket_name = "gstd_eglstream_test";
    struct sockaddr_un address;
    int  socket_fd;
    int evfd;
@@ -238,7 +227,7 @@ int main ( int argc, char *argv[] )
    esContext.userData = &userData;
 
    esCreateWindow ( &esContext, "Simple Texture 2D", 320, 240, ES_WINDOW_RGB, &stream, evfd );
-
+   
    if ( !Init ( &esContext ) )
       return 0;
 

@@ -23,7 +23,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <sys/time.h>
-#include <GLES3/gl3.h>
+#include <GLES2/gl2.h>
 #include <EGL/egl.h>
 #include "esUtil.h"
 
@@ -94,6 +94,98 @@ EGLBoolean CreateEGLContext ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
    // Make the context current
    if ( !eglMakeCurrent(display, surface, surface, context) )
    {
+      return EGL_FALSE;
+   }
+   
+   *eglDisplay = display;
+   *eglSurface = surface;
+   *eglContext = context;
+   return EGL_TRUE;
+} 
+
+///
+// CreateEGLContext()
+//
+//    Creates an EGL rendering context and all associated elements
+//
+EGLBoolean CreateEGLContextProd ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
+                              EGLContext* eglContext, EGLSurface* eglSurface,
+                              EGLint attribList[], EGLStreamKHR* stream, int evfd)
+{
+   EGLint numConfigs;
+   EGLint majorVersion;
+   EGLint minorVersion;
+   EGLDisplay display;
+   EGLContext context;
+   EGLSurface surface;
+   EGLConfig config;
+   EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE, EGL_NONE };
+
+   EGLBoolean eglStatus = EGL_TRUE;
+
+    EGLint srfAttribs[] = {
+        EGL_WIDTH, 800,
+        EGL_HEIGHT, 480,
+        EGL_NONE, EGL_NONE
+    };
+
+   // Get Display
+   display = eglGetDisplay((EGLNativeDisplayType)x_display);
+   if ( display == EGL_NO_DISPLAY )
+   {
+      return EGL_FALSE;
+   }
+
+   // Initialize EGL
+   if ( !eglInitialize(display, &majorVersion, &minorVersion) )
+   {
+      return EGL_FALSE;
+   }
+
+   PFNEGLCREATESTREAMFROMFILEDESCRIPTORKHRPROC eglCreateStreamFromFileDescriptorKHR = (PFNEGLCREATESTREAMFROMFILEDESCRIPTORKHRPROC)eglGetProcAddress("eglCreateStreamFromFileDescriptorKHR");
+   *stream = eglCreateStreamFromFileDescriptorKHR(display, evfd);
+   if (*stream == EGL_NO_STREAM_KHR) {
+      printf("Could not create EGL stream.\n");
+      eglStatus = EGL_FALSE;
+   } else {
+      printf("Productor connected to stream.\n");
+   }
+
+
+   // Get configs
+   if ( !eglGetConfigs(display, NULL, 0, &numConfigs) )
+   {
+      return EGL_FALSE;
+   }
+
+   // Choose config
+   if ( !eglChooseConfig(display, attribList, &config, 1, &numConfigs) )
+   {
+      return EGL_FALSE;
+   }
+
+   // Create a surface
+   // surface = eglCreateWindowSurface(display, config, (EGLNativeWindowType)hWnd, NULL);
+   PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC eglCreateStreamProducerSurfaceKHR = (PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC)eglGetProcAddress("eglCreateStreamProducerSurfaceKHR");
+   surface = eglCreateStreamProducerSurfaceKHR (display, config, *stream, srfAttribs);
+   if ( surface == EGL_NO_SURFACE )
+   {
+      printf ("No surface \n");
+      return EGL_FALSE;
+   }
+
+   // Create a GL context
+   context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs );
+   if ( context == EGL_NO_CONTEXT )
+   {
+      printf ("No context \n");
+      return EGL_FALSE;
+   }   
+   
+   // Make the context current
+   if ( !eglMakeCurrent(display, surface, surface, context) )
+   {
+      printf ("Bag make current \n");
       return EGL_FALSE;
    }
    
@@ -280,6 +372,60 @@ GLboolean ESUTIL_API esCreateWindow ( ESContext *esContext, const char* title, G
 }
 
 ///
+//  esCreateWindow()
+//
+//      title - name for title bar of window
+//      width - width of window to create
+//      height - height of window to create
+//      flags  - bitwise or of window creation flags 
+//          ES_WINDOW_ALPHA       - specifies that the framebuffer should have alpha
+//          ES_WINDOW_DEPTH       - specifies that a depth buffer should be created
+//          ES_WINDOW_STENCIL     - specifies that a stencil buffer should be created
+//          ES_WINDOW_MULTISAMPLE - specifies that a multi-sample buffer should be created
+//
+GLboolean ESUTIL_API esCreateWindowProd ( ESContext *esContext, const char* title, GLint width, GLint height, GLuint flags, EGLStreamKHR *stream, int evfd )
+{
+   EGLint attribList[] =
+   {
+       EGL_RED_SIZE,       5,
+       EGL_GREEN_SIZE,     6,
+       EGL_BLUE_SIZE,      5,
+       EGL_ALPHA_SIZE,     (flags & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
+       EGL_DEPTH_SIZE,     (flags & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
+       EGL_STENCIL_SIZE,   (flags & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
+       EGL_SAMPLE_BUFFERS, (flags & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
+       EGL_NONE
+   };
+   
+   if ( esContext == NULL )
+   {
+      return GL_FALSE;
+   }
+
+   esContext->width = width;
+   esContext->height = height;
+
+   if ( !WinCreate ( esContext, title) )
+   {
+      return GL_FALSE;
+   }
+
+  
+   if ( !CreateEGLContextProd ( esContext->hWnd,
+                            &esContext->eglDisplay,
+                            &esContext->eglContext,
+                            &esContext->eglSurface,
+                            attribList, stream, evfd) )
+   {
+      return GL_FALSE;
+   }
+   
+
+   return GL_TRUE;
+}
+
+
+///
 //  esMainLoop()
 //
 //    Start the main loop for the OpenGL ES application
@@ -306,7 +452,7 @@ void ESUTIL_API esMainLoop ( ESContext *esContext )
         if (esContext->drawFunc != NULL)
             esContext->drawFunc(esContext);
 
-        // eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
+        eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
 
         totaltime += deltatime;
         frames++;
