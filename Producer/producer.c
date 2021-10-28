@@ -14,8 +14,12 @@
 //    texture image. The purpose of this example is to demonstrate 
 //    the basics of 2D texturing
 //
+
 #include <stdlib.h>
 #include "esUtil.h"
+
+#define WINDOW_WIDTH 320
+#define WINDOW_HEIGHT 240
 
 typedef struct
 {
@@ -118,6 +122,7 @@ int Init ( ESContext *esContext )
 ///
 // Draw a triangle using the shader pair created in Init()
 //
+int control = 0;
 void Draw ( ESContext *esContext )
 {
    UserData *userData = esContext->userData;
@@ -151,8 +156,14 @@ void Draw ( ESContext *esContext )
    glEnableVertexAttribArray ( userData->positionLoc );
    glEnableVertexAttribArray ( userData->texCoordLoc );
 
+   control++;
+   if (control == 255) {
+      control = 0;
+   }
+
    // Bind the texture
    glActiveTexture ( GL_TEXTURE0 );
+   userData->textureId = CreateSimpleTexture2D (255, control, 255);
    glBindTexture ( GL_TEXTURE_2D, userData->textureId );
 
    // Set the sampler texture unit to 0
@@ -226,7 +237,7 @@ int main ( int argc, char *argv[] )
    esInitContext ( &esContext );
    esContext.userData = &userData;
 
-   esCreateWindow ( &esContext, "Simple Texture 2D", 320, 240, ES_WINDOW_RGB, &stream, evfd );
+   esCreateWindow ( &esContext, "Simple Texture 2D", WINDOW_WIDTH, WINDOW_HEIGHT, ES_WINDOW_RGB, &stream, evfd );
    
    if ( !Init ( &esContext ) )
       return 0;

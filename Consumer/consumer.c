@@ -32,6 +32,10 @@
 
 #include "esUtil.h"
 
+#define SAVE_FRAME FALSE
+#define WINDOW_WIDTH 320
+#define WINDOW_HEIGHT 240
+
 PFNEGLGETSTREAMFILEDESCRIPTORKHRPROC            eglGetStreamFileDescriptorKHR;
 PFNEGLSTREAMCONSUMERACQUIREKHRPROC              eglStreamConsumerAcquireKHR;
 PFNEGLSTREAMCONSUMERRELEASEKHRPROC              eglStreamConsumerReleaseKHR;
@@ -46,9 +50,6 @@ EGLStreamKHR stream;
 EGLBoolean eglStatus = EGL_TRUE;
 GLuint textureId2D;
 GLuint FramebufferName;
-
-int window_width = 320;
-int window_height = 240;
 
 void initEGLStreamUtil () {
    eglGetStreamFileDescriptorKHR = (PFNEGLGETSTREAMFILEDESCRIPTORKHRPROC)eglGetProcAddress("eglGetStreamFileDescriptorKHR");
@@ -78,10 +79,47 @@ typedef struct
 
 } UserData;
 
+void save_frame () {
+   FILE *output_image = NULL;
+
+   output_image = fopen("/home/joseda8/Desktop/output.ppm", "wt");
+   fprintf(output_image,"P3\n");
+   fprintf(output_image,"# Created by Jose Montoya\n");
+   fprintf(output_image,"%d %d\n", WINDOW_WIDTH, WINDOW_HEIGHT);
+   fprintf(output_image,"255\n");
+
+   unsigned char *pixels = (unsigned char*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT*4);
+   int i, j, k;
+   int sum = 0;
+
+   glReadBuffer (GL_COLOR_ATTACHMENT0);
+   glReadPixels (0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+   glBindTexture (GL_TEXTURE_2D, textureId2D);
+   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+   k = 0;
+   for(i=0; i<WINDOW_WIDTH; i++)
+   {
+      for(j=0; j<WINDOW_HEIGHT; j++)
+      {
+         sum = pixels[k] + pixels[k+1] + pixels[k+2] + pixels[k+3];
+         if (sum > 255) {
+            // printf ("%u %u %u %u\n", (unsigned int)pixels[k],(unsigned int)pixels[k+1], (unsigned int)pixels[k+2], (unsigned int)pixels[k+3]);
+         }
+         fprintf(output_image,"%u %u %u ",(unsigned int)pixels[k],(unsigned int)pixels[k+1], (unsigned int)pixels[k+2]);
+         k = k+4;
+      }
+      fprintf(output_image,"\n");
+   }
+
+   free(pixels);
+}
+
 ///
 // Create a simple 2x2 texture image with four different colors
 //
-GLuint CreateSimpleTexture2D( int red, int green, int blue )
+GLuint CreateSimpleTexture2D()
 {
    // Texture object handle
    GLuint textureId;
@@ -169,7 +207,7 @@ int Init ( ESContext *esContext )
    }
 
    // Load the texture
-   userData->textureId = CreateSimpleTexture2D (255, 50, 255);
+   userData->textureId = CreateSimpleTexture2D ();
 
    glClearColor ( 0.0f, 0.0f, 0.0f, 0.0f );
 
@@ -298,47 +336,15 @@ void Draw ( ESContext *esContext )
        printf("Unexpected state for swap: %04x.\n", eglStatus);
    }
 
-   // FILE    *output_image;
-
-   // output_image = fopen("/home/joseda8/Desktop/output.ppm", "wt");
-   // fprintf(output_image,"P3\n");
-   // fprintf(output_image,"# Created by Jose Montoya\n");
-   // fprintf(output_image,"%d %d\n",window_width, window_height);
-   // fprintf(output_image,"255\n");
-
-   // unsigned char *pixels = (unsigned char*) malloc(window_width*window_height*4);
-   // int i, j, k;
-   // int sum = 0;
-
-   // glReadBuffer(GL_COLOR_ATTACHMENT0);
-   // glReadPixels(0, 0, window_width, window_height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-   // glBindTexture(GL_TEXTURE_2D, textureId2D);
-   // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, window_width, window_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-   // k = 0;
-   // for(i=0; i<window_width; i++)
-   // {
-   //    for(j=0; j<window_height; j++)
-   //    {
-   //       sum = pixels[k] + pixels[k+1] + pixels[k+2] + pixels[k+3];
-   //       if (sum > 255) {
-   //          // printf ("%u %u %u %u\n", (unsigned int)pixels[k],(unsigned int)pixels[k+1], (unsigned int)pixels[k+2], (unsigned int)pixels[k+3]);
-   //       }
-   //       fprintf(output_image,"%u %u %u ",(unsigned int)pixels[k],(unsigned int)pixels[k+1], (unsigned int)pixels[k+2]);
-   //       k = k+4;
-   //    }
-   //    fprintf(output_image,"\n");
-   // }
-   // printf ("\n");
-   // free(pixels);
-
    if (!eglStreamConsumerReleaseKHR(esContext->eglDisplay, stream)) {
     printf ("Release frame failed.\n\n");
    } else {
     printf ("Frame released.\n\n");
    }
-
+   
+   if (SAVE_FRAME) {
+      save_frame ();
+   }
 }
 
 ///
@@ -419,7 +425,7 @@ int main ( int argc, char *argv[] )
    esInitContext ( &esContext );
    esContext.userData = &userData;
 
-   esCreateWindow ( &esContext, "Simple Texture 2D", window_width, window_height, ES_WINDOW_RGB );
+   esCreateWindow ( &esContext, "Simple Texture 2D", WINDOW_WIDTH, WINDOW_HEIGHT, ES_WINDOW_RGB );
 
    initEGLStreamUtil ();
    if ( !Init ( &esContext ) ) {
@@ -472,7 +478,6 @@ int main ( int argc, char *argv[] )
    }
 
    esRegisterDrawFunc ( &esContext, Draw );
-
 
    esMainLoop ( &esContext );
 

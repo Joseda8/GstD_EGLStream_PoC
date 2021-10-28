@@ -16,7 +16,7 @@ UTILPRODUCER=./Producer/esUtil.c
 SRC_B=./Base/base.c
 SRC_C=./Consumer/consumer.c
 SRC_G=./GstDBase/gstd.c
-SRC_PC=./GstDProducer/gstd.c
+SRC_PC=./GstDProducer/producer.c
 SRC_P=./Producer/producer.c
 
 default: all
@@ -25,11 +25,11 @@ all:                                      \
      ./Base/base                          \
      ./Consumer/consumer                  \
      ./GstDBase/gstd                      \
-     ./GstDProducer/gstd                  \
+     ./GstDProducer/producer              \
      ./Producer/producer
 
 clean:
-	rm ./Base/base ./Consumer/consumer ./GstDBase/gstd ./Producer/producer ./GstDProducer/gstd
+	rm ./Base/base ./Consumer/consumer ./GstDBase/gstd ./Producer/producer ./GstDProducer/producer
 
 ./Base/base: ${UTILBASE} ${COMMONHDR} ${SRC_B}
 	gcc ${COMMONSRC} ${UTILBASE} ${SRC_B} -o ./$@ ${INCDIR} ${LIBS}
@@ -40,7 +40,7 @@ clean:
 ./Consumer/consumer: ${UTILCONSUMER} ${COMMONHDR} ${SRC_C}
 	gcc ${COMMONSRC} ${UTILCONSUMER} ${SRC_C} -o ./$@ ${INCDIR} ${LIBS}
 
-./GstDProducer/gstd: ${UTILGSTDPRODUCER} ${COMMONHDR} ${SRC_PC}
+./GstDProducer/producer: ${UTILGSTDPRODUCER} ${COMMONHDR} ${SRC_PC}
 	gcc ${COMMONSRC} ${UTILGSTDPRODUCER} ${SRC_PC} -o ./$@ ${INCDIR} ${LIBS}
 
 ./Producer/producer: ${UTILPRODUCER} ${COMMONHDR} ${SRC_P}

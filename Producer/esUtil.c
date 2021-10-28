@@ -41,7 +41,7 @@ static Display *x_display = NULL;
 //
 EGLBoolean CreateEGLContext ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
                               EGLContext* eglContext, EGLSurface* eglSurface,
-                              EGLint attribList[], EGLStreamKHR* stream, int evfd)
+                              EGLint attribList[], EGLStreamKHR* stream, int evfd, GLint width, GLint height)
 {
    EGLint numConfigs;
    EGLint majorVersion;
@@ -55,8 +55,8 @@ EGLBoolean CreateEGLContext ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
    EGLBoolean eglStatus = EGL_TRUE;
 
     EGLint srfAttribs[] = {
-        EGL_WIDTH, 800,
-        EGL_HEIGHT, 480,
+        EGL_WIDTH, width,
+        EGL_HEIGHT, height,
         EGL_NONE, EGL_NONE
     };
 
@@ -96,7 +96,7 @@ EGLBoolean CreateEGLContext ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
    }
 
    // Create a surface
-   // surface = eglCreateWindowSurface(display, config, (EGLNativeWindowType)hWnd, NULL);
+   surface = eglCreateWindowSurface(display, config, (EGLNativeWindowType)hWnd, NULL);
    PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC eglCreateStreamProducerSurfaceKHR = (PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC)eglGetProcAddress("eglCreateStreamProducerSurfaceKHR");
    surface = eglCreateStreamProducerSurfaceKHR (display, config, *stream, srfAttribs);
    if ( surface == EGL_NO_SURFACE )
@@ -293,7 +293,7 @@ GLboolean ESUTIL_API esCreateWindow( ESContext *esContext, const char* title, GL
                             &esContext->eglDisplay,
                             &esContext->eglContext,
                             &esContext->eglSurface,
-                            attribList, stream, evfd) )
+                            attribList, stream, evfd, esContext->width, esContext->height) )
    {
       return GL_FALSE;
    }

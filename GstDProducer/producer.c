@@ -33,6 +33,9 @@
 
 #include "esUtil.h"
 
+#define WINDOW_WIDTH 320
+#define WINDOW_HEIGHT 240
+
 PFNEGLGETSTREAMFILEDESCRIPTORKHRPROC            eglGetStreamFileDescriptorKHR;
 PFNEGLSTREAMCONSUMERACQUIREKHRPROC              eglStreamConsumerAcquireKHR;
 PFNEGLSTREAMCONSUMERRELEASEKHRPROC              eglStreamConsumerReleaseKHR;
@@ -152,7 +155,7 @@ int main ( int argc, char *argv[] )
    esInitContext ( &esContext );
    esContext.userData = &userData;
 
-   esCreateWindow ( &esContext, "Simple Texture 2D", 320, 240, ES_WINDOW_RGB );
+   esCreateWindow ( &esContext, "Simple Texture 2D", WINDOW_WIDTH, WINDOW_HEIGHT, ES_WINDOW_RGB );
 
    initEGLStreamUtil ();
 
@@ -181,15 +184,14 @@ int main ( int argc, char *argv[] )
      return FALSE;
    }
 
-   // ret = gstd_create (manager, "/pipelines", "p", "videotestsrc name=vts ! autovideosink");
    ret = gstd_create (manager, 
       "/pipelines", 
       "p",
       "videotestsrc pattern=0 ! nvvidconv ! nvvideosink name=nv_sink"); 
       // "filesrc location=/home/joseda8/Desktop/test3.mp4 ! qtdemux name=demux ! h264parse ! omxh264dec ! nvvidconv ! nvvideosink name=nv_sink");
    if (GSTD_EOK != ret) {
-   g_print ("Failed \n");
-   return 0;
+      g_print ("Failed \n");
+      return 0;
    }
 
    gstd_read (manager, "pipelines/p/elements/nv_sink", &resource);
