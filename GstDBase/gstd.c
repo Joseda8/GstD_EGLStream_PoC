@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <gstd.h>
 
-#include "esUtil.h"
+#include "../Common/esUtil.h"
 
 PFNEGLGETSTREAMFILEDESCRIPTORKHRPROC eglGetStreamFileDescriptorKHR;
 PFNEGLSTREAMCONSUMERACQUIREKHRPROC eglStreamConsumerAcquireKHR;
@@ -31,7 +31,7 @@ PFNEGLSTREAMATTRIBKHRPROC eglStreamAttribKHR;
 
 
 EGLStreamKHR stream;
-EGLBoolean eglStatus = EGL_TRUE;
+EGLint eglStatus = EGL_TRUE;
 
 GstD *manager = NULL;
 
@@ -315,7 +315,6 @@ int main ( int argc, char *argv[] )
 
 
    int ret = GSTD_EOK;
-   int time_sleep = 1;
    
    int fifoLength = 0;
    int latency = 0;

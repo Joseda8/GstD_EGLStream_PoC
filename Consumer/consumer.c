@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "esUtil.h"
+#include "../Common/esUtil.h"
 
 #define SAVE_FRAME FALSE
 #define WINDOW_WIDTH 320

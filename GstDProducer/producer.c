@@ -31,7 +31,7 @@
 #include <unistd.h>
 #include <gstd.h>
 
-#include "esUtil.h"
+#include "../Common/esUtil.h"
 
 #define WINDOW_WIDTH 320
 #define WINDOW_HEIGHT 240

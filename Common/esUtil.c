@@ -110,7 +110,7 @@ EGLBoolean CreateEGLContext ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
 //
 EGLBoolean CreateEGLContextProd ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
                               EGLContext* eglContext, EGLSurface* eglSurface,
-                              EGLint attribList[], EGLStreamKHR* stream, int evfd)
+                              EGLint attribList[], EGLStreamKHR* stream, int evfd, GLint width, GLint height)
 {
    EGLint numConfigs;
    EGLint majorVersion;
@@ -124,8 +124,8 @@ EGLBoolean CreateEGLContextProd ( EGLNativeWindowType hWnd, EGLDisplay* eglDispl
    EGLBoolean eglStatus = EGL_TRUE;
 
     EGLint srfAttribs[] = {
-        EGL_WIDTH, 800,
-        EGL_HEIGHT, 480,
+        EGL_WIDTH, width,
+        EGL_HEIGHT, height,
         EGL_NONE, EGL_NONE
     };
 
@@ -415,7 +415,7 @@ GLboolean ESUTIL_API esCreateWindowProd ( ESContext *esContext, const char* titl
                             &esContext->eglDisplay,
                             &esContext->eglContext,
                             &esContext->eglSurface,
-                            attribList, stream, evfd) )
+                            attribList, stream, evfd, esContext->width, esContext->height) )
    {
       return GL_FALSE;
    }

@@ -16,7 +16,7 @@
 //
 
 #include <stdlib.h>
-#include "esUtil.h"
+#include "../Common/esUtil.h"
 
 #define WINDOW_WIDTH 320
 #define WINDOW_HEIGHT 240
@@ -194,7 +194,6 @@ int main ( int argc, char *argv[] )
    ESContext esContext;
    UserData  userData;
 
-   EGLBoolean eglStatus = EGL_TRUE;
    EGLStreamKHR stream;
 
    EGLNativeFileDescriptorKHR fd;
@@ -237,7 +236,7 @@ int main ( int argc, char *argv[] )
    esInitContext ( &esContext );
    esContext.userData = &userData;
 
-   esCreateWindow ( &esContext, "Simple Texture 2D", WINDOW_WIDTH, WINDOW_HEIGHT, ES_WINDOW_RGB, &stream, evfd );
+   esCreateWindowProd ( &esContext, "Simple Texture 2D", WINDOW_WIDTH, WINDOW_HEIGHT, ES_WINDOW_RGB, &stream, evfd );
    
    if ( !Init ( &esContext ) )
       return 0;

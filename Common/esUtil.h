@@ -113,6 +113,49 @@ typedef struct _escontext
 //
 
 //
+///
+/// \brief Initialize ES framework context.  This must be called before calling any other functions.
+/// \param esContext Application context
+//
+void ESUTIL_API esInitContext ( ESContext *esContext );
+
+//
+/// \brief Create a window with the specified parameters
+/// \param esContext Application context
+/// \param title Name for title bar of window
+/// \param width Width in pixels of window to create
+/// \param height Height in pixels of window to create
+/// \param flags Bitfield for the window creation flags 
+///         ES_WINDOW_RGB     - specifies that the color buffer should have R,G,B channels
+///         ES_WINDOW_ALPHA   - specifies that the color buffer should have alpha
+///         ES_WINDOW_DEPTH   - specifies that a depth buffer should be created
+///         ES_WINDOW_STENCIL - specifies that a stencil buffer should be created
+///         ES_WINDOW_MULTISAMPLE - specifies that a multi-sample buffer should be created
+/// \return GL_TRUE if window creation is succesful, GL_FALSE otherwise
+GLboolean ESUTIL_API esCreateWindow ( ESContext *esContext, const char *title, GLint width, GLint height, GLuint flags );
+
+//
+/// \brief Create a window with the specified parameters
+/// \param esContext Application context
+/// \param title Name for title bar of window
+/// \param width Width in pixels of window to create
+/// \param height Height in pixels of window to create
+/// \param flags Bitfield for the window creation flags 
+///         ES_WINDOW_RGB     - specifies that the color buffer should have R,G,B channels
+///         ES_WINDOW_ALPHA   - specifies that the color buffer should have alpha
+///         ES_WINDOW_DEPTH   - specifies that a depth buffer should be created
+///         ES_WINDOW_STENCIL - specifies that a stencil buffer should be created
+///         ES_WINDOW_MULTISAMPLE - specifies that a multi-sample buffer should be created
+/// \return GL_TRUE if window creation is succesful, GL_FALSE otherwise
+GLboolean ESUTIL_API esCreateWindowProd ( ESContext *esContext, const char *title, GLint width, GLint height, GLuint flags, EGLStreamKHR *stream, int evfd );
+
+//
+/// \brief Start the main loop for the OpenGL ES application
+/// \param esContext Application context
+//
+void ESUTIL_API esMainLoop ( ESContext *esContext );
+
+//
 /// \brief Register a draw callback function to be used to render each frame
 /// \param esContext Application context
 /// \param drawFunc Draw callback function that will be used to render the scene

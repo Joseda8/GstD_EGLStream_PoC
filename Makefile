@@ -3,15 +3,10 @@ LIBS=-lGLESv2 -lEGL -lm -lX11 -lancillary -lgstd-1.0 `pkg-config --cflags --libs
 
 COMMONSRC=./Common/esShader.c    \
           ./Common/esTransform.c \
-          ./Common/esShapes.c
+          ./Common/esShapes.c    \
+          ./Common/esUtil.c
 
-COMMONHRD=esUtil.h
-
-UTILBASE=./Base/esUtil.c
-UTILCONSUMER=./Consumer/esUtil.c
-UTILGSTD=./GstDBase/esUtil.c
-UTILGSTDPRODUCER=./GstDProducer/esUtil.c
-UTILPRODUCER=./Producer/esUtil.c
+COMMONHRD=./Common/esUtil.h
 
 SRC_B=./Base/base.c
 SRC_C=./Consumer/consumer.c
@@ -31,18 +26,18 @@ all:                                      \
 clean:
 	rm ./Base/base ./Consumer/consumer ./GstDBase/gstd ./Producer/producer ./GstDProducer/producer
 
-./Base/base: ${UTILBASE} ${COMMONHDR} ${SRC_B}
-	gcc ${COMMONSRC} ${UTILBASE} ${SRC_B} -o ./$@ ${INCDIR} ${LIBS}
+./Base/base: ${COMMONHDR} ${SRC_B}
+	gcc ${COMMONSRC} ${SRC_B} -o ./$@ ${INCDIR} ${LIBS}
 
-./GstDBase/gstd: ${UTILGSTD} ${COMMONHDR} ${SRC_G}
-	gcc ${COMMONSRC} ${UTILGSTD} ${SRC_G} -o ./$@ ${INCDIR} ${LIBS}
+./GstDBase/gstd: ${COMMONHDR} ${SRC_G}
+	gcc ${COMMONSRC} ${SRC_G} -o ./$@ ${INCDIR} ${LIBS}
 
-./Consumer/consumer: ${UTILCONSUMER} ${COMMONHDR} ${SRC_C}
-	gcc ${COMMONSRC} ${UTILCONSUMER} ${SRC_C} -o ./$@ ${INCDIR} ${LIBS}
+./Consumer/consumer: ${COMMONHDR} ${SRC_C}
+	gcc ${COMMONSRC} ${SRC_C} -o ./$@ ${INCDIR} ${LIBS}
 
-./GstDProducer/producer: ${UTILGSTDPRODUCER} ${COMMONHDR} ${SRC_PC}
-	gcc ${COMMONSRC} ${UTILGSTDPRODUCER} ${SRC_PC} -o ./$@ ${INCDIR} ${LIBS}
+./GstDProducer/producer: ${COMMONHDR} ${SRC_PC}
+	gcc ${COMMONSRC} ${SRC_PC} -o ./$@ ${INCDIR} ${LIBS}
 
-./Producer/producer: ${UTILPRODUCER} ${COMMONHDR} ${SRC_P}
-	gcc ${COMMONSRC} ${UTILPRODUCER} ${SRC_P} -o ./$@ ${INCDIR} ${LIBS}
+./Producer/producer: ${COMMONHDR} ${SRC_P}
+	gcc ${COMMONSRC} ${SRC_P} -o ./$@ ${INCDIR} ${LIBS}
 

@@ -14,8 +14,9 @@
 //    texture image. The purpose of this example is to demonstrate 
 //    the basics of 2D texturing
 //
+
 #include <stdlib.h>
-#include "esUtil.h"
+#include "../Common/esUtil.h"
 
 typedef struct
 {
