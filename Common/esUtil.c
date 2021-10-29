@@ -200,7 +200,7 @@ EGLBoolean CreateEGLContextProd ( EGLNativeWindowType hWnd, EGLDisplay* eglDispl
 //
 //      This function initialized the native X11 display and window for EGL
 //
-EGLBoolean WinCreate(ESContext *esContext, const char *title)
+EGLBoolean WinCreate(ESContext *esContext, const char *title, int show_window)
 {
     Window root;
     XSetWindowAttributes swa;
@@ -240,7 +240,9 @@ EGLBoolean WinCreate(ESContext *esContext, const char *title)
     XSetWMHints(x_display, win, &hints);
 
     // make the window visible on the screen
-    XMapWindow (x_display, win);
+    if (show_window) {
+       XMapWindow (x_display, win);
+    }
     XStoreName (x_display, win, title);
 
     // get identifiers for the provided atom name strings
@@ -330,7 +332,7 @@ void ESUTIL_API esInitContext ( ESContext *esContext )
 //          ES_WINDOW_STENCIL     - specifies that a stencil buffer should be created
 //          ES_WINDOW_MULTISAMPLE - specifies that a multi-sample buffer should be created
 //
-GLboolean ESUTIL_API esCreateWindow ( ESContext *esContext, const char* title, GLint width, GLint height, GLuint flags )
+GLboolean ESUTIL_API esCreateWindow ( ESContext *esContext, const char* title, GLint width, GLint height, GLuint flags, int show_window )
 {
    EGLint attribList[] =
    {
@@ -352,7 +354,7 @@ GLboolean ESUTIL_API esCreateWindow ( ESContext *esContext, const char* title, G
    esContext->width = width;
    esContext->height = height;
 
-   if ( !WinCreate ( esContext, title) )
+   if ( !WinCreate ( esContext, title, show_window) )
    {
       return GL_FALSE;
    }
@@ -405,7 +407,7 @@ GLboolean ESUTIL_API esCreateWindowProd ( ESContext *esContext, const char* titl
    esContext->width = width;
    esContext->height = height;
 
-   if ( !WinCreate ( esContext, title) )
+   if ( !WinCreate ( esContext, title, FALSE) )
    {
       return GL_FALSE;
    }

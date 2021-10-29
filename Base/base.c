@@ -187,7 +187,7 @@ int main ( int argc, char *argv[] )
    esInitContext ( &esContext );
    esContext.userData = &userData;
 
-   esCreateWindow ( &esContext, "Simple Texture 2D", 320, 240, ES_WINDOW_RGB );
+   esCreateWindow ( &esContext, "Simple Texture 2D", 320, 240, ES_WINDOW_RGB, TRUE );
 
    if ( !Init ( &esContext ) )
       return 0;

@@ -155,7 +155,7 @@ int main ( int argc, char *argv[] )
    esInitContext ( &esContext );
    esContext.userData = &userData;
 
-   esCreateWindow ( &esContext, "Simple Texture 2D", WINDOW_WIDTH, WINDOW_HEIGHT, ES_WINDOW_RGB );
+   esCreateWindow ( &esContext, "Simple Texture 2D", WINDOW_WIDTH, WINDOW_HEIGHT, ES_WINDOW_RGB, FALSE );
 
    initEGLStreamUtil ();
 

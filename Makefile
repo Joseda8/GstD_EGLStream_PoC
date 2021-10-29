@@ -2,8 +2,6 @@ INCDIR=-I./Common
 LIBS=-lGLESv2 -lEGL -lm -lX11 -lancillary -lgstd-1.0 `pkg-config --cflags --libs gstreamer-1.0`
 
 COMMONSRC=./Common/esShader.c    \
-          ./Common/esTransform.c \
-          ./Common/esShapes.c    \
           ./Common/esUtil.c
 
 COMMONHRD=./Common/esUtil.h
