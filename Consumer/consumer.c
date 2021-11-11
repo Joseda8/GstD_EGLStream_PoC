@@ -32,7 +32,7 @@
 
 #include "../Common/esUtil.h"
 
-#define SAVE_FRAME FALSE
+#define SAVE_FRAME TRUE
 #define WINDOW_WIDTH 320
 #define WINDOW_HEIGHT 240
 
@@ -88,27 +88,27 @@ void save_frame () {
    fprintf(output_image,"%d %d\n", WINDOW_WIDTH, WINDOW_HEIGHT);
    fprintf(output_image,"255\n");
 
-   unsigned char *pixels = (unsigned char*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT*4);
+   unsigned char *pixels = (unsigned char*) malloc(WINDOW_WIDTH*WINDOW_HEIGHT*3);
    int i, j, k;
    int sum = 0;
 
    glReadBuffer (GL_COLOR_ATTACHMENT0);
-   glReadPixels (0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+   glReadPixels (0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 
    glBindTexture (GL_TEXTURE_2D, textureId2D);
-   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 
    k = 0;
    for(i=0; i<WINDOW_WIDTH; i++)
    {
       for(j=0; j<WINDOW_HEIGHT; j++)
       {
-         sum = pixels[k] + pixels[k+1] + pixels[k+2] + pixels[k+3];
-         if (sum > 255) {
-            // printf ("%u %u %u %u\n", (unsigned int)pixels[k],(unsigned int)pixels[k+1], (unsigned int)pixels[k+2], (unsigned int)pixels[k+3]);
-         }
+         // sum = pixels[k] + pixels[k+1] + pixels[k+2] + pixels[k+3];
+         // if (sum > 255) {
+         //    // printf ("%u %u %u %u\n", (unsigned int)pixels[k],(unsigned int)pixels[k+1], (unsigned int)pixels[k+2], (unsigned int)pixels[k+3]);
+         // }
          fprintf(output_image,"%u %u %u ",(unsigned int)pixels[k],(unsigned int)pixels[k+1], (unsigned int)pixels[k+2]);
-         k = k+4;
+         k = k+3;
       }
       fprintf(output_image,"\n");
    }
@@ -223,7 +223,17 @@ int Init ( ESContext *esContext )
 void Draw ( ESContext *esContext )
 {
    UserData *userData = esContext->userData;
-   GLfloat vVertices[] = { -0.5f,  0.5f, 0.0f,  // Position 0
+   GLfloat vVertices[] = { 
+                           // -1.0f,  1.0f, 0.0f,  // Position 0
+                           //  0.0f,  0.0f,        // TexCoord 0 
+                           // -1.0f, -1.0f, 0.0f,  // Position 1
+                           //  0.0f,  1.0f,        // TexCoord 1
+                           //  1.0f, -1.0f, 0.0f,  // Position 2
+                           //  1.0f,  1.0f,        // TexCoord 2
+                           //  1.0f,  1.0f, 0.0f,  // Position 3
+                           //  1.0f,  0.0f         // TexCoord 3
+
+                           -0.5f,  0.5f, 0.0f,  // Position 0
                             0.0f,  0.0f,        // TexCoord 0 
                            -0.5f, -0.5f, 0.0f,  // Position 1
                             0.0f,  1.0f,        // TexCoord 1
@@ -232,6 +242,7 @@ void Draw ( ESContext *esContext )
                             0.5f,  0.5f, 0.0f,  // Position 3
                             1.0f,  0.0f         // TexCoord 3
                          };
+
    GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
 
    eglStatus = 0;
@@ -384,8 +395,6 @@ int main ( int argc, char *argv[] )
    UserData  userData;
 
    static const EGLint streamAttrFIFOMode[] = { EGL_STREAM_FIFO_LENGTH_KHR, 5, EGL_SUPPORT_RESET_NV, EGL_TRUE, EGL_NONE };
-
-   int time_sleep = 1;
    
    int fifoLength = 0;
    int latency = 0;

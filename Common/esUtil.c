@@ -40,67 +40,67 @@ static Display *x_display = NULL;
 //    Creates an EGL rendering context and all associated elements
 //
 EGLBoolean CreateEGLContext ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
-                              EGLContext* eglContext, EGLSurface* eglSurface,
-                              EGLint attribList[])
+                           EGLContext* eglContext, EGLSurface* eglSurface,
+                           EGLint attribList[])
 {
-   EGLint numConfigs;
-   EGLint majorVersion;
-   EGLint minorVersion;
-   EGLDisplay display;
-   EGLContext context;
-   EGLSurface surface;
-   EGLConfig config;
-   EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE, EGL_NONE };
+EGLint numConfigs;
+EGLint majorVersion;
+EGLint minorVersion;
+EGLDisplay display;
+EGLContext context;
+EGLSurface surface;
+EGLConfig config;
+EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE, EGL_NONE };
 
-   // Get Display
-   display = eglGetDisplay((EGLNativeDisplayType)x_display);
-   if ( display == EGL_NO_DISPLAY )
-   {
-      return EGL_FALSE;
-   }
+// Get Display
+display = eglGetDisplay((EGLNativeDisplayType)x_display);
+if ( display == EGL_NO_DISPLAY )
+{
+   return EGL_FALSE;
+}
 
-   // Initialize EGL
-   if ( !eglInitialize(display, &majorVersion, &minorVersion) )
-   {
-      return EGL_FALSE;
-   }
+// Initialize EGL
+if ( !eglInitialize(display, &majorVersion, &minorVersion) )
+{
+   return EGL_FALSE;
+}
 
-   // Get configs
-   if ( !eglGetConfigs(display, NULL, 0, &numConfigs) )
-   {
-      return EGL_FALSE;
-   }
+// Get configs
+if ( !eglGetConfigs(display, NULL, 0, &numConfigs) )
+{
+   return EGL_FALSE;
+}
 
-   // Choose config
-   if ( !eglChooseConfig(display, attribList, &config, 1, &numConfigs) )
-   {
-      return EGL_FALSE;
-   }
+// Choose config
+if ( !eglChooseConfig(display, attribList, &config, 1, &numConfigs) )
+{
+   return EGL_FALSE;
+}
 
-   // Create a surface
-   surface = eglCreateWindowSurface(display, config, (EGLNativeWindowType)hWnd, NULL);
-   if ( surface == EGL_NO_SURFACE )
-   {
-      return EGL_FALSE;
-   }
+// Create a surface
+surface = eglCreateWindowSurface(display, config, (EGLNativeWindowType)hWnd, NULL);
+if ( surface == EGL_NO_SURFACE )
+{
+   return EGL_FALSE;
+}
 
-   // Create a GL context
-   context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs );
-   if ( context == EGL_NO_CONTEXT )
-   {
-      return EGL_FALSE;
-   }   
-   
-   // Make the context current
-   if ( !eglMakeCurrent(display, surface, surface, context) )
-   {
-      return EGL_FALSE;
-   }
-   
-   *eglDisplay = display;
-   *eglSurface = surface;
-   *eglContext = context;
-   return EGL_TRUE;
+// Create a GL context
+context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs );
+if ( context == EGL_NO_CONTEXT )
+{
+   return EGL_FALSE;
+}   
+
+// Make the context current
+if ( !eglMakeCurrent(display, surface, surface, context) )
+{
+   return EGL_FALSE;
+}
+
+*eglDisplay = display;
+*eglSurface = surface;
+*eglContext = context;
+return EGL_TRUE;
 } 
 
 ///
@@ -109,90 +109,90 @@ EGLBoolean CreateEGLContext ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
 //    Creates an EGL rendering context and all associated elements
 //
 EGLBoolean CreateEGLContextProd ( EGLNativeWindowType hWnd, EGLDisplay* eglDisplay,
-                              EGLContext* eglContext, EGLSurface* eglSurface,
-                              EGLint attribList[], EGLStreamKHR* stream, int evfd, GLint width, GLint height)
+                           EGLContext* eglContext, EGLSurface* eglSurface,
+                           EGLint attribList[], EGLStreamKHR* stream, int evfd, GLint width, GLint height)
 {
-   EGLint numConfigs;
-   EGLint majorVersion;
-   EGLint minorVersion;
-   EGLDisplay display;
-   EGLContext context;
-   EGLSurface surface;
-   EGLConfig config;
-   EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE, EGL_NONE };
+EGLint numConfigs;
+EGLint majorVersion;
+EGLint minorVersion;
+EGLDisplay display;
+EGLContext context;
+EGLSurface surface;
+EGLConfig config;
+EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE, EGL_NONE };
 
-   EGLBoolean eglStatus = EGL_TRUE;
+EGLBoolean eglStatus = EGL_TRUE;
 
-    EGLint srfAttribs[] = {
-        EGL_WIDTH, width,
-        EGL_HEIGHT, height,
-        EGL_NONE, EGL_NONE
-    };
+   EGLint srfAttribs[] = {
+      EGL_WIDTH, width,
+      EGL_HEIGHT, height,
+      EGL_NONE, EGL_NONE
+   };
 
-   // Get Display
-   display = eglGetDisplay((EGLNativeDisplayType)x_display);
-   if ( display == EGL_NO_DISPLAY )
-   {
-      return EGL_FALSE;
-   }
+// Get Display
+display = eglGetDisplay((EGLNativeDisplayType)x_display);
+if ( display == EGL_NO_DISPLAY )
+{
+   return EGL_FALSE;
+}
 
-   // Initialize EGL
-   if ( !eglInitialize(display, &majorVersion, &minorVersion) )
-   {
-      return EGL_FALSE;
-   }
+// Initialize EGL
+if ( !eglInitialize(display, &majorVersion, &minorVersion) )
+{
+   return EGL_FALSE;
+}
 
-   PFNEGLCREATESTREAMFROMFILEDESCRIPTORKHRPROC eglCreateStreamFromFileDescriptorKHR = (PFNEGLCREATESTREAMFROMFILEDESCRIPTORKHRPROC)eglGetProcAddress("eglCreateStreamFromFileDescriptorKHR");
-   *stream = eglCreateStreamFromFileDescriptorKHR(display, evfd);
-   if (*stream == EGL_NO_STREAM_KHR) {
-      printf("Could not create EGL stream.\n");
-      eglStatus = EGL_FALSE;
-   } else {
-      printf("Productor connected to stream.\n");
-   }
+PFNEGLCREATESTREAMFROMFILEDESCRIPTORKHRPROC eglCreateStreamFromFileDescriptorKHR = (PFNEGLCREATESTREAMFROMFILEDESCRIPTORKHRPROC)eglGetProcAddress("eglCreateStreamFromFileDescriptorKHR");
+*stream = eglCreateStreamFromFileDescriptorKHR(display, evfd);
+if (*stream == EGL_NO_STREAM_KHR) {
+   printf("Could not create EGL stream.\n");
+   eglStatus = EGL_FALSE;
+} else {
+   printf("Productor connected to stream.\n");
+}
 
 
-   // Get configs
-   if ( !eglGetConfigs(display, NULL, 0, &numConfigs) )
-   {
-      return EGL_FALSE;
-   }
+// Get configs
+if ( !eglGetConfigs(display, NULL, 0, &numConfigs) )
+{
+   return EGL_FALSE;
+}
 
-   // Choose config
-   if ( !eglChooseConfig(display, attribList, &config, 1, &numConfigs) )
-   {
-      return EGL_FALSE;
-   }
+// Choose config
+if ( !eglChooseConfig(display, attribList, &config, 1, &numConfigs) )
+{
+   return EGL_FALSE;
+}
 
-   // Create a surface
-   // surface = eglCreateWindowSurface(display, config, (EGLNativeWindowType)hWnd, NULL);
-   PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC eglCreateStreamProducerSurfaceKHR = (PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC)eglGetProcAddress("eglCreateStreamProducerSurfaceKHR");
-   surface = eglCreateStreamProducerSurfaceKHR (display, config, *stream, srfAttribs);
-   if ( surface == EGL_NO_SURFACE )
-   {
-      printf ("No surface \n");
-      return EGL_FALSE;
-   }
+// Create a surface
+// surface = eglCreateWindowSurface(display, config, (EGLNativeWindowType)hWnd, NULL);
+PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC eglCreateStreamProducerSurfaceKHR = (PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC)eglGetProcAddress("eglCreateStreamProducerSurfaceKHR");
+surface = eglCreateStreamProducerSurfaceKHR (display, config, *stream, srfAttribs);
+if ( surface == EGL_NO_SURFACE )
+{
+   printf ("No surface \n");
+   return EGL_FALSE;
+}
 
-   // Create a GL context
-   context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs );
-   if ( context == EGL_NO_CONTEXT )
-   {
-      printf ("No context \n");
-      return EGL_FALSE;
-   }   
-   
-   // Make the context current
-   if ( !eglMakeCurrent(display, surface, surface, context) )
-   {
-      printf ("Bag make current \n");
-      return EGL_FALSE;
-   }
-   
-   *eglDisplay = display;
-   *eglSurface = surface;
-   *eglContext = context;
-   return EGL_TRUE;
+// Create a GL context
+context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs );
+if ( context == EGL_NO_CONTEXT )
+{
+   printf ("No context \n");
+   return EGL_FALSE;
+}   
+
+// Make the context current
+if ( !eglMakeCurrent(display, surface, surface, context) )
+{
+   printf ("Bag make current \n");
+   return EGL_FALSE;
+}
+
+*eglDisplay = display;
+*eglSurface = surface;
+*eglContext = context;
+return EGL_TRUE;
 } 
 
 ///
@@ -202,68 +202,68 @@ EGLBoolean CreateEGLContextProd ( EGLNativeWindowType hWnd, EGLDisplay* eglDispl
 //
 EGLBoolean WinCreate(ESContext *esContext, const char *title, int show_window)
 {
-    Window root;
-    XSetWindowAttributes swa;
-    XSetWindowAttributes  xattr;
-    Atom wm_state;
-    XWMHints hints;
-    XEvent xev;
-    EGLConfig ecfg;
-    EGLint num_config;
-    Window win;
+   Window root;
+   XSetWindowAttributes swa;
+   XSetWindowAttributes  xattr;
+   Atom wm_state;
+   XWMHints hints;
+   XEvent xev;
+   EGLConfig ecfg;
+   EGLint num_config;
+   Window win;
 
-    /*
-     * X11 native display initialization
-     */
+   /*
+   * X11 native display initialization
+   */
 
-    x_display = XOpenDisplay(NULL);
-    if ( x_display == NULL )
-    {
-        return EGL_FALSE;
-    }
+   x_display = XOpenDisplay(NULL);
+   if ( x_display == NULL )
+   {
+      return EGL_FALSE;
+   }
 
-    root = DefaultRootWindow(x_display);
+   root = DefaultRootWindow(x_display);
 
-    swa.event_mask  =  ExposureMask | PointerMotionMask | KeyPressMask;
-    win = XCreateWindow(
-               x_display, root,
-               0, 0, esContext->width, esContext->height, 0,
-               CopyFromParent, InputOutput,
-               CopyFromParent, CWEventMask,
-               &swa );
+   swa.event_mask  =  ExposureMask | PointerMotionMask | KeyPressMask;
+   win = XCreateWindow(
+            x_display, root,
+            0, 0, esContext->width, esContext->height, 0,
+            CopyFromParent, InputOutput,
+            CopyFromParent, CWEventMask,
+            &swa );
 
-    xattr.override_redirect = FALSE;
-    XChangeWindowAttributes ( x_display, win, CWOverrideRedirect, &xattr );
+   xattr.override_redirect = FALSE;
+   XChangeWindowAttributes ( x_display, win, CWOverrideRedirect, &xattr );
 
-    hints.input = TRUE;
-    hints.flags = InputHint;
-    XSetWMHints(x_display, win, &hints);
+   hints.input = TRUE;
+   hints.flags = InputHint;
+   XSetWMHints(x_display, win, &hints);
 
-    // make the window visible on the screen
-    if (show_window) {
-       XMapWindow (x_display, win);
-    }
-    XStoreName (x_display, win, title);
+   // make the window visible on the screen
+   if (show_window) {
+      XMapWindow (x_display, win);
+   }
+   XStoreName (x_display, win, title);
 
-    // get identifiers for the provided atom name strings
-    wm_state = XInternAtom (x_display, "_NET_WM_STATE", FALSE);
+   // get identifiers for the provided atom name strings
+   wm_state = XInternAtom (x_display, "_NET_WM_STATE", FALSE);
 
-    memset ( &xev, 0, sizeof(xev) );
-    xev.type                 = ClientMessage;
-    xev.xclient.window       = win;
-    xev.xclient.message_type = wm_state;
-    xev.xclient.format       = 32;
-    xev.xclient.data.l[0]    = 1;
-    xev.xclient.data.l[1]    = FALSE;
-    XSendEvent (
-       x_display,
-       DefaultRootWindow ( x_display ),
-       FALSE,
-       SubstructureNotifyMask,
-       &xev );
+   memset ( &xev, 0, sizeof(xev) );
+   xev.type                 = ClientMessage;
+   xev.xclient.window       = win;
+   xev.xclient.message_type = wm_state;
+   xev.xclient.format       = 32;
+   xev.xclient.data.l[0]    = 1;
+   xev.xclient.data.l[1]    = FALSE;
+   XSendEvent (
+      x_display,
+      DefaultRootWindow ( x_display ),
+      FALSE,
+      SubstructureNotifyMask,
+      &xev );
 
-    esContext->hWnd = (EGLNativeWindowType) win;
-    return EGL_TRUE;
+   esContext->hWnd = (EGLNativeWindowType) win;
+   return EGL_TRUE;
 }
 
 
@@ -275,27 +275,27 @@ EGLBoolean WinCreate(ESContext *esContext, const char *title, int show_window)
 //
 GLboolean userInterrupt(ESContext *esContext)
 {
-    XEvent xev;
-    KeySym key;
-    GLboolean userinterrupt = GL_FALSE;
-    char text;
+   XEvent xev;
+   KeySym key;
+   GLboolean userinterrupt = GL_FALSE;
+   char text;
 
-    // Pump all messages from X server. Keypresses are directed to keyfunc (if defined)
-    while ( XPending ( x_display ) )
-    {
-        XNextEvent( x_display, &xev );
-        if ( xev.type == KeyPress )
-        {
-            if (XLookupString(&xev.xkey,&text,1,&key,0)==1)
-            {
-                if (esContext->keyFunc != NULL)
-                    esContext->keyFunc(esContext, text, 0, 0);
-            }
-        }
-        if ( xev.type == DestroyNotify )
-            userinterrupt = GL_TRUE;
-    }
-    return userinterrupt;
+   // Pump all messages from X server. Keypresses are directed to keyfunc (if defined)
+   while ( XPending ( x_display ) )
+   {
+      XNextEvent( x_display, &xev );
+      if ( xev.type == KeyPress )
+      {
+         if (XLookupString(&xev.xkey,&text,1,&key,0)==1)
+         {
+               if (esContext->keyFunc != NULL)
+                  esContext->keyFunc(esContext, text, 0, 0);
+         }
+      }
+      if ( xev.type == DestroyNotify )
+         userinterrupt = GL_TRUE;
+   }
+   return userinterrupt;
 }
 
 
@@ -313,10 +313,10 @@ GLboolean userInterrupt(ESContext *esContext)
 //
 void ESUTIL_API esInitContext ( ESContext *esContext )
 {
-   if ( esContext != NULL )
-   {
-      memset( esContext, 0, sizeof( ESContext) );
-   }
+if ( esContext != NULL )
+{
+   memset( esContext, 0, sizeof( ESContext) );
+}
 }
 
 
@@ -334,43 +334,43 @@ void ESUTIL_API esInitContext ( ESContext *esContext )
 //
 GLboolean ESUTIL_API esCreateWindow ( ESContext *esContext, const char* title, GLint width, GLint height, GLuint flags, int show_window )
 {
-   EGLint attribList[] =
-   {
-       EGL_RED_SIZE,       5,
-       EGL_GREEN_SIZE,     6,
-       EGL_BLUE_SIZE,      5,
-       EGL_ALPHA_SIZE,     (flags & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
-       EGL_DEPTH_SIZE,     (flags & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
-       EGL_STENCIL_SIZE,   (flags & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
-       EGL_SAMPLE_BUFFERS, (flags & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
-       EGL_NONE
-   };
-   
-   if ( esContext == NULL )
-   {
-      return GL_FALSE;
-   }
+EGLint attribList[] =
+{
+      EGL_RED_SIZE,       5,
+      EGL_GREEN_SIZE,     5,
+      EGL_BLUE_SIZE,      5,
+      EGL_ALPHA_SIZE,     (flags & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
+      EGL_DEPTH_SIZE,     (flags & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
+      EGL_STENCIL_SIZE,   (flags & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
+      EGL_SAMPLE_BUFFERS, (flags & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
+      EGL_NONE
+};
 
-   esContext->width = width;
-   esContext->height = height;
+if ( esContext == NULL )
+{
+   return GL_FALSE;
+}
 
-   if ( !WinCreate ( esContext, title, show_window) )
-   {
-      return GL_FALSE;
-   }
+esContext->width = width;
+esContext->height = height;
 
-  
-   if ( !CreateEGLContext ( esContext->hWnd,
-                            &esContext->eglDisplay,
-                            &esContext->eglContext,
-                            &esContext->eglSurface,
-                            attribList) )
-   {
-      return GL_FALSE;
-   }
-   
+if ( !WinCreate ( esContext, title, show_window) )
+{
+   return GL_FALSE;
+}
 
-   return GL_TRUE;
+
+if ( !CreateEGLContext ( esContext->hWnd,
+                           &esContext->eglDisplay,
+                           &esContext->eglContext,
+                           &esContext->eglSurface,
+                           attribList) )
+{
+   return GL_FALSE;
+}
+
+
+return GL_TRUE;
 }
 
 ///
@@ -387,43 +387,43 @@ GLboolean ESUTIL_API esCreateWindow ( ESContext *esContext, const char* title, G
 //
 GLboolean ESUTIL_API esCreateWindowProd ( ESContext *esContext, const char* title, GLint width, GLint height, GLuint flags, EGLStreamKHR *stream, int evfd )
 {
-   EGLint attribList[] =
-   {
-       EGL_RED_SIZE,       5,
-       EGL_GREEN_SIZE,     6,
-       EGL_BLUE_SIZE,      5,
-       EGL_ALPHA_SIZE,     (flags & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
-       EGL_DEPTH_SIZE,     (flags & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
-       EGL_STENCIL_SIZE,   (flags & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
-       EGL_SAMPLE_BUFFERS, (flags & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
-       EGL_NONE
-   };
-   
-   if ( esContext == NULL )
-   {
-      return GL_FALSE;
-   }
+EGLint attribList[] =
+{
+      EGL_RED_SIZE,       5,
+      EGL_GREEN_SIZE,     6,
+      EGL_BLUE_SIZE,      5,
+      EGL_ALPHA_SIZE,     (flags & ES_WINDOW_ALPHA) ? 8 : EGL_DONT_CARE,
+      EGL_DEPTH_SIZE,     (flags & ES_WINDOW_DEPTH) ? 8 : EGL_DONT_CARE,
+      EGL_STENCIL_SIZE,   (flags & ES_WINDOW_STENCIL) ? 8 : EGL_DONT_CARE,
+      EGL_SAMPLE_BUFFERS, (flags & ES_WINDOW_MULTISAMPLE) ? 1 : 0,
+      EGL_NONE
+};
 
-   esContext->width = width;
-   esContext->height = height;
+if ( esContext == NULL )
+{
+   return GL_FALSE;
+}
 
-   if ( !WinCreate ( esContext, title, FALSE) )
-   {
-      return GL_FALSE;
-   }
+esContext->width = width;
+esContext->height = height;
 
-  
-   if ( !CreateEGLContextProd ( esContext->hWnd,
-                            &esContext->eglDisplay,
-                            &esContext->eglContext,
-                            &esContext->eglSurface,
-                            attribList, stream, evfd, esContext->width, esContext->height) )
-   {
-      return GL_FALSE;
-   }
-   
+if ( !WinCreate ( esContext, title, FALSE) )
+{
+   return GL_FALSE;
+}
 
-   return GL_TRUE;
+
+if ( !CreateEGLContextProd ( esContext->hWnd,
+                           &esContext->eglDisplay,
+                           &esContext->eglContext,
+                           &esContext->eglSurface,
+                           attribList, stream, evfd, esContext->width, esContext->height) )
+{
+   return GL_FALSE;
+}
+
+
+return GL_TRUE;
 }
 
 
@@ -435,36 +435,36 @@ GLboolean ESUTIL_API esCreateWindowProd ( ESContext *esContext, const char* titl
 
 void ESUTIL_API esMainLoop ( ESContext *esContext )
 {
-    struct timeval t1, t2;
-    struct timezone tz;
-    float deltatime;
-    float totaltime = 0.0f;
-    unsigned int frames = 0;
+   struct timeval t1, t2;
+   struct timezone tz;
+   float deltatime;
+   float totaltime = 0.0f;
+   unsigned int frames = 0;
 
-    gettimeofday ( &t1 , &tz );
+   gettimeofday ( &t1 , &tz );
 
-    while(userInterrupt(esContext) == GL_FALSE)
-    {
-        gettimeofday(&t2, &tz);
-        deltatime = (float)(t2.tv_sec - t1.tv_sec + (t2.tv_usec - t1.tv_usec) * 1e-6);
-        t1 = t2;
+   while(userInterrupt(esContext) == GL_FALSE)
+   {
+      gettimeofday(&t2, &tz);
+      deltatime = (float)(t2.tv_sec - t1.tv_sec + (t2.tv_usec - t1.tv_usec) * 1e-6);
+      t1 = t2;
 
-        if (esContext->updateFunc != NULL)
-            esContext->updateFunc(esContext, deltatime);
-        if (esContext->drawFunc != NULL)
-            esContext->drawFunc(esContext);
+      if (esContext->updateFunc != NULL)
+         esContext->updateFunc(esContext, deltatime);
+      if (esContext->drawFunc != NULL)
+         esContext->drawFunc(esContext);
 
-        eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
+      eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
 
-        totaltime += deltatime;
-        frames++;
-        if (totaltime >  2.0f)
-        {
-            printf("%4d frames rendered in %1.4f seconds -> FPS=%3.4f\n", frames, totaltime, frames/totaltime);
-            totaltime -= 2.0f;
-            frames = 0;
-        }
-    }
+      totaltime += deltatime;
+      frames++;
+      if (totaltime >  2.0f)
+      {
+         printf("%4d frames rendered in %1.4f seconds -> FPS=%3.4f\n", frames, totaltime, frames/totaltime);
+         totaltime -= 2.0f;
+         frames = 0;
+      }
+   }
 }
 
 
@@ -490,9 +490,9 @@ void ESUTIL_API esRegisterUpdateFunc ( ESContext *esContext, void (ESCALLBACK *u
 //  esRegisterKeyFunc()
 //
 void ESUTIL_API esRegisterKeyFunc ( ESContext *esContext,
-                                    void (ESCALLBACK *keyFunc) (ESContext*, unsigned char, int, int ) )
+                                 void (ESCALLBACK *keyFunc) (ESContext*, unsigned char, int, int ) )
 {
-   esContext->keyFunc = keyFunc;
+esContext->keyFunc = keyFunc;
 }
 
 
@@ -503,15 +503,15 @@ void ESUTIL_API esRegisterKeyFunc ( ESContext *esContext,
 //
 void ESUTIL_API esLogMessage ( const char *formatStr, ... )
 {
-    va_list params;
-    char buf[BUFSIZ];
+   va_list params;
+   char buf[BUFSIZ];
 
-    va_start ( params, formatStr );
-    vsprintf ( buf, formatStr, params );
-    
-    printf ( "%s", buf );
-    
-    va_end ( params );
+   va_start ( params, formatStr );
+   vsprintf ( buf, formatStr, params );
+   
+   printf ( "%s", buf );
+   
+   va_end ( params );
 }
 
 
@@ -525,42 +525,42 @@ void ESUTIL_API esLogMessage ( const char *formatStr, ... )
 
 char* ESUTIL_API esLoadTGA ( char *fileName, int *width, int *height )
 {
-    char *buffer = NULL;
-    FILE *f;
-    unsigned char tgaheader[12];
-    unsigned char attributes[6];
-    unsigned int imagesize;
+   char *buffer = NULL;
+   FILE *f;
+   unsigned char tgaheader[12];
+   unsigned char attributes[6];
+   unsigned int imagesize;
 
-    f = fopen(fileName, "rb");
-    if(f == NULL) return NULL;
+   f = fopen(fileName, "rb");
+   if(f == NULL) return NULL;
 
-    if(fread(&tgaheader, sizeof(tgaheader), 1, f) == 0)
-    {
-        fclose(f);
-        return NULL;
-    }
+   if(fread(&tgaheader, sizeof(tgaheader), 1, f) == 0)
+   {
+      fclose(f);
+      return NULL;
+   }
 
-    if(fread(attributes, sizeof(attributes), 1, f) == 0)
-    {
-        fclose(f);
-        return 0;
-    }
+   if(fread(attributes, sizeof(attributes), 1, f) == 0)
+   {
+      fclose(f);
+      return 0;
+   }
 
-    *width = attributes[1] * 256 + attributes[0];
-    *height = attributes[3] * 256 + attributes[2];
-    imagesize = attributes[4] / 8 * *width * *height;
-    buffer = malloc(imagesize);
-    if (buffer == NULL)
-    {
-        fclose(f);
-        return 0;
-    }
+   *width = attributes[1] * 256 + attributes[0];
+   *height = attributes[3] * 256 + attributes[2];
+   imagesize = attributes[4] / 8 * *width * *height;
+   buffer = malloc(imagesize);
+   if (buffer == NULL)
+   {
+      fclose(f);
+      return 0;
+   }
 
-    if(fread(buffer, 1, imagesize, f) != imagesize)
-    {
-        free(buffer);
-        return NULL;
-    }
-    fclose(f);
-    return buffer;
+   if(fread(buffer, 1, imagesize, f) != imagesize)
+   {
+      free(buffer);
+      return NULL;
+   }
+   fclose(f);
+   return buffer;
 }
